@@ -1,0 +1,10 @@
+version: '2'
+services:
+  pact-broker:
+    image: pactfoundation/pact-broker
+    container_name: gatling-consumer-contract-pact-broker
+    environment:
+    - PACT_BROKER_DATABASE_ADAPTER=sqlite
+    - PACT_BROKER_DATABASE_NAME=pact.sqlite
+    ports:
+    - "9292:9292"
