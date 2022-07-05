@@ -50,7 +50,7 @@ public class ConsumerContractStore {
     }
 
     private void headers(HttpRequestActionBuilder httpRequestActionBuilder, Interaction interaction) {
-        interaction.getRequestHeaders().forEach(httpRequestActionBuilder::header);
+        interaction.getRequestHeaders().forEach((key, value) -> httpRequestActionBuilder.header(key, String.join(",", value)));
     }
 
     private void body(HttpRequestActionBuilder httpRequestActionBuilder, Interaction interaction) {
@@ -59,7 +59,13 @@ public class ConsumerContractStore {
     }
 
     private void queryParameters(HttpRequestActionBuilder httpRequestActionBuilder, Interaction interaction) {
-        interaction.getQueryParameters().forEach(httpRequestActionBuilder::queryParam);
+        interaction.getQueryParameters().forEach((key, value) -> {
+            if (value.size() == 1) {
+                httpRequestActionBuilder.queryParam(key, value.get(0));
+            } else {
+                httpRequestActionBuilder.multivaluedQueryParam(key, String.join(",", value));
+            }
+        });
     }
 
     private HttpRequestActionBuilder baseBuilder(Http http, Interaction interaction) {

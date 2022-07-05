@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NonNull;
 
+import java.util.List;
 import java.util.Map;
 
 @Builder
@@ -29,10 +30,10 @@ class Interaction {
     private final Integer statusCode;
 
     @NonNull
-    private final Map<String, String> requestHeaders;
+    private final Map<String, List<String>> requestHeaders;
 
     @NonNull
-    private final Map<String, String> queryParameters;
+    private final Map<String, List<String>> queryParameters;
 
     private final String body;
 }

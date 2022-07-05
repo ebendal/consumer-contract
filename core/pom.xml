@@ -13,16 +13,17 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.gatling</groupId>
             <artifactId>gatling-core-java</artifactId>
         </dependency>
         <dependency>
             <groupId>io.gatling</groupId>
             <artifactId>gatling-http-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
