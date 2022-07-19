@@ -1,0 +1,29 @@
+version: 2.1
+jobs:
+  semantic-version:
+    docker:
+    - image: ebendal/ci-base
+    steps:
+    - checkout
+    - run: git config user.name $GIT_USER_NAME
+    - run: git config user.email $GIT_USER_EMAIL
+    - run: ./pipeline/version.sh --push
+    - persist_to_workspace:
+        root: ./
+        paths:
+        - application-version.txt
+  build:
+    docker:
+    - image: maven:3-jdk-11
+    steps:
+    - checkout
+    - attach_workspace:
+        at: ./
+    - run: ./pipeline/build.sh
+workflows:
+  build-and-deploy:
+    jobs:
+    - semantic-version
+    - build:
+        requires:
+        - semantic-version
