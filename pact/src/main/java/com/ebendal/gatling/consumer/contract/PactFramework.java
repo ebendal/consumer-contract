@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 public class PactFramework implements ConsumerContractFramework {
     private final CustomPactBrokerLoader customPactBrokerLoader;
 
-    public PactFramework(String pactBrokerUrl) {
-        customPactBrokerLoader = new CustomPactBrokerLoader(pactBrokerUrl);
+    public PactFramework() {
+        customPactBrokerLoader = new CustomPactBrokerLoader();
     }
 
     @Override

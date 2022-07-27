@@ -14,7 +14,7 @@ import static io.gatling.javaapi.http.HttpDsl.http;
 
 public class GatlingSimulation extends Simulation {
 
-    private final ConsumerContractStore contractStore = new ConsumerContractStore(new PactFramework("http://localhost:9292"));
+    private final ConsumerContractStore contractStore = new ConsumerContractStore(new PactFramework());
 
     public GatlingSimulation() {
         contractStore.loadInteractions(Name.PROVIDER);

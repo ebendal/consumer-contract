@@ -79,8 +79,9 @@
                 <artifactId>maven</artifactId>
                 <version>${pact.version}</version>
                 <configuration>
-                    <pactBrokerUrl>http://localhost:9292</pactBrokerUrl>
-                    <trimSnapshot>true</trimSnapshot>
+                    <pactBrokerUrl>${pactbroker.url}</pactBrokerUrl>
+                    <pactBrokerUsername>${pactbroker.auth.username}</pactBrokerUsername>
+                    <pactBrokerPassword>${pactbroker.auth.password}</pactBrokerPassword>
                 </configuration>
                 <executions>
                     <execution>
