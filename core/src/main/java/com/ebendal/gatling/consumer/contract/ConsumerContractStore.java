@@ -1,6 +1,7 @@
 package com.ebendal.gatling.consumer.contract;
 
 import io.gatling.javaapi.core.ChainBuilder;
+import io.gatling.javaapi.core.exec.Execs;
 import io.gatling.javaapi.http.Http;
 import io.gatling.javaapi.http.HttpRequestActionBuilder;
 import lombok.Builder;
@@ -36,6 +37,19 @@ public class ConsumerContractStore {
                 .providerName(interaction.getProviderName())
                 .interactionName(interaction.getInteractionName())
                 .build(), identity()));
+    }
+
+    public ChainBuilder allInteractions() {
+        return interactions.keySet().stream()
+            .map(key -> interaction(key.getConsumerName(), key.getInteractionName()))
+            .reduce(ChainBuilder.EMPTY, Execs::exec);
+    }
+
+    public ChainBuilder allInteractionsForConsumer(String consumerName) {
+        return interactions.keySet().stream()
+            .filter(key -> key.getConsumerName().equals(consumerName))
+            .map(key -> interaction(key.getConsumerName(), key.getInteractionName()))
+            .reduce(ChainBuilder.EMPTY, Execs::exec);
     }
 
     public ChainBuilder interaction(String consumerName, String interactionName) {

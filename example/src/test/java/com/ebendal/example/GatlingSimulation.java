@@ -19,14 +19,15 @@ public class GatlingSimulation extends Simulation {
     public GatlingSimulation() {
         contractStore.loadInteractions(Name.PROVIDER);
         HttpProtocolBuilder httpProtocol = http.baseUrl("http://localhost:8080");
-        var scenario = scenario("Example scenario")
-            .exec(contractStore.interaction(Name.CONSUMER, Name.INTERACTION));
-        setUp(scenario.injectOpen(constantUsersPerSec(1).during(Duration.ofMinutes(1))))
+        var statefulScenario = scenario("Stateful scenario")
+            .exec(contractStore.interaction(Name.CONSUMER_ONE, Name.CREATE_BOOK_INTERACTION));
+        var statelessScenario = scenario("Stateless scenario")
+            .exec(contractStore.allInteractionsForConsumer(Name.CONSUMER_TWO));
+
+        setUp(
+            statefulScenario.injectOpen(constantUsersPerSec(1).during(Duration.ofMinutes(1))),
+            statelessScenario.injectOpen(constantUsersPerSec(1).during(Duration.ofMinutes(1))))
             .protocols(httpProtocol)
             .assertions(global().successfulRequests().percent().gte(100.0));
-    }
-
-    @Override
-    public void before() {
     }
 }
