@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -56,30 +57,35 @@ public class ConsumerContractStore {
         Interaction interaction = getInteraction(consumerName, interactionName);
         Http http = http(interactionName);
         HttpRequestActionBuilder httpRequestActionBuilder = baseBuilder(http, interaction);
-        body(httpRequestActionBuilder, interaction);
-        headers(httpRequestActionBuilder, interaction);
-        queryParameters(httpRequestActionBuilder, interaction);
-        httpRequestActionBuilder.check(status().is(interaction.getStatusCode()));
+        httpRequestActionBuilder = body(httpRequestActionBuilder, interaction);
+        httpRequestActionBuilder = headers(httpRequestActionBuilder, interaction);
+        httpRequestActionBuilder = queryParameters(httpRequestActionBuilder, interaction);
+        httpRequestActionBuilder = httpRequestActionBuilder.check(status().is(interaction.getStatusCode()));
         return exec(httpRequestActionBuilder);
     }
 
-    private void headers(HttpRequestActionBuilder httpRequestActionBuilder, Interaction interaction) {
-        interaction.getRequestHeaders().forEach((key, value) -> httpRequestActionBuilder.header(key, String.join(",", value)));
+    private HttpRequestActionBuilder headers(HttpRequestActionBuilder httpRequestActionBuilder, Interaction interaction) {
+        for (Map.Entry<String, List<String>> entry : interaction.getRequestHeaders().entrySet()) {
+            httpRequestActionBuilder = httpRequestActionBuilder.header(entry.getKey(), String.join(",", entry.getValue()));
+        }
+        return httpRequestActionBuilder;
     }
 
-    private void body(HttpRequestActionBuilder httpRequestActionBuilder, Interaction interaction) {
-        Optional.ofNullable(interaction.getBody())
-            .ifPresent(body -> httpRequestActionBuilder.body(StringBody(body)));
+    private HttpRequestActionBuilder body(HttpRequestActionBuilder httpRequestActionBuilder, Interaction interaction) {
+        return Optional.ofNullable(interaction.getBody())
+            .map(body -> httpRequestActionBuilder.body(StringBody(body)))
+            .orElse(httpRequestActionBuilder);
     }
 
-    private void queryParameters(HttpRequestActionBuilder httpRequestActionBuilder, Interaction interaction) {
-        interaction.getQueryParameters().forEach((key, value) -> {
-            if (value.size() == 1) {
-                httpRequestActionBuilder.queryParam(key, value.get(0));
+    private HttpRequestActionBuilder queryParameters(HttpRequestActionBuilder httpRequestActionBuilder, Interaction interaction) {
+        for (Map.Entry<String, List<String>> entry : interaction.getQueryParameters().entrySet()) {
+            if (entry.getValue().size() == 1) {
+                httpRequestActionBuilder = httpRequestActionBuilder.queryParam(entry.getKey(), entry.getValue().get(0));
             } else {
-                httpRequestActionBuilder.multivaluedQueryParam(key, String.join(",", value));
+                httpRequestActionBuilder = httpRequestActionBuilder.multivaluedQueryParam(entry.getKey(), String.join(",", entry.getValue()));
             }
-        });
+        }
+        return httpRequestActionBuilder;
     }
 
     private HttpRequestActionBuilder baseBuilder(Http http, Interaction interaction) {

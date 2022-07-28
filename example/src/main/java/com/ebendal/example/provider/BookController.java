@@ -27,9 +27,8 @@ class BookController {
 
     @GetMapping(value = "")
     public ResponseEntity<List<Book>> getAllBooks() {
-        return ResponseEntity.status(HttpStatus.CREATED).body(bookJpaRepository.findAll());
+        return ResponseEntity.status(HttpStatus.OK).body(bookJpaRepository.findAll());
     }
-
 
     @Getter
     @Setter
