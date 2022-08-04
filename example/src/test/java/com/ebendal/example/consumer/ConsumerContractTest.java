@@ -14,6 +14,9 @@ import org.json.JSONException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.skyscreamer.jsonassert.JSONCompareMode;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
@@ -44,6 +47,53 @@ class ConsumerContractTest {
                 body.uuid("id", UUID.fromString("4d956508-473c-4d91-ae4b-abc666666cd5"));
                 body.stringType("title", "Consumer One title");
             }).build())
+            .toPact();
+    }
+
+    @Pact(provider = Name.PROVIDER, consumer = Name.CONSUMER_ONE)
+    public RequestResponsePact consumerOneGetAllBooks(PactDslWithProvider builder) {
+        return builder
+            .uponReceiving(Name.GET_ALL_BOOKS_INTERACTION)
+            .path("/api/books")
+            .method("GET")
+            .willRespondWith()
+            .status(200)
+            .body(newJsonArray((item) -> item.object(book -> {
+                book.uuid("id", UUID.fromString("4d956508-473c-4d91-ae4b-abc666666cd5"));
+                book.stringType("title", "Consumer One title");
+            })).build())
+            .toPact();
+    }
+
+    @Pact(provider = Name.PROVIDER, consumer = Name.CONSUMER_ONE)
+    public RequestResponsePact consumerOneGetBookById(PactDslWithProvider builder) {
+        return builder
+            .uponReceiving(Name.GET_BOOK_BY_ID_INTERACTION)
+            .matchPath("^/api/books/[0-9a-fA-F]{8}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{12}$", "/api/books/4d956508-473c-4d91-ae4b-abc666666cd5")
+            .method("GET")
+            .willRespondWith()
+            .status(200)
+            .body(newJsonBody(book -> {
+                book.uuid("id", UUID.fromString("4d956508-473c-4d91-ae4b-abc666666cd5"));
+                book.stringType("title", "Consumer One title");
+            }).build())
+            .toPact();
+    }
+
+    @Pact(provider = Name.PROVIDER, consumer = Name.CONSUMER_ONE)
+    public RequestResponsePact consumerOneCheckId(PactDslWithProvider builder) {
+        return builder
+            .uponReceiving(Name.CHECK_ID)
+            .matchPath("^/api/books/[0-9a-fA-F]{8}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{12}$", "/api/books/4d956508-473c-4d91-ae4b-abc666666cd5")
+            .method("POST")
+            .headers(Map.of("Content-Type", "application/json"))
+            .matchQuery("queryParameterId", "^[0-9a-fA-F]{8}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{12}$", "4d956508-473c-4d91-ae4b-abc666666cd5")
+            .matchHeader("headerId", "^[0-9a-fA-F]{8}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{12}$", "4d956508-473c-4d91-ae4b-abc666666cd5")
+            .body(newJsonBody(book -> {
+                book.uuid("id", UUID.fromString("4d956508-473c-4d91-ae4b-abc666666cd5"));
+            }).build())
+            .willRespondWith()
+            .status(204)
             .toPact();
     }
 
@@ -93,6 +143,40 @@ class ConsumerContractTest {
     }
 
     @Test
+    @PactTestFor(pactMethod = "consumerOneGetAllBooks", pactVersion = PactSpecVersion.V3)
+    void consumerOneGetAllBooksTest(MockServer mockServer) throws JSONException {
+        String response = restTemplate.getForObject(mockServer.getUrl() + "/api/books", String.class);
+
+        assertEquals("[\n" +
+            "  {\n" +
+            "    \"title\": \"Consumer One title\",\n" +
+            "    \"id\": \"4d956508-473c-4d91-ae4b-abc666666cd5\"\n" +
+            "}\n" +
+            "]", response, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    @PactTestFor(pactMethod = "consumerOneGetBookById", pactVersion = PactSpecVersion.V3)
+    void consumerOneGetBookByIdTest(MockServer mockServer) throws JSONException {
+        String response = restTemplate.getForObject(mockServer.getUrl() + "/api/books/4d956508-473c-4d91-ae4b-abc666666cd5", String.class);
+
+        assertEquals("{\n" +
+            "  \"title\": \"Consumer One title\",\n" +
+            "  \"id\": \"4d956508-473c-4d91-ae4b-abc666666cd5\"\n" +
+            "}", response, JSONCompareMode.STRICT);
+    }
+
+    @Test
+    @PactTestFor(pactMethod = "consumerOneCheckId", pactVersion = PactSpecVersion.V3)
+    void consumerOneCheckIdTest(MockServer mockServer) throws JSONException {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set("headerId", "4d956508-473c-4d91-ae4b-abc666666cd5");
+        HttpEntity<IdCheckDto> requestEntity = new HttpEntity<>(new IdCheckDto(UUID.fromString("4d956508-473c-4d91-ae4b-abc666666cd5")), httpHeaders);
+        String url = mockServer.getUrl() + "/api/books/4d956508-473c-4d91-ae4b-abc666666cd5?queryParameterId=4d956508-473c-4d91-ae4b-abc666666cd5";
+        restTemplate.exchange(url, HttpMethod.POST, requestEntity, Void.class);
+    }
+
+    @Test
     @PactTestFor(pactMethod = "consumerTwoCreateBook", pactVersion = PactSpecVersion.V3)
     void consumerTwoCreateBookTest(MockServer mockServer) throws JSONException {
         String response = restTemplate.postForObject(mockServer.getUrl() + "/api/books", new CreateBookDto("Random title"), String.class);
@@ -120,5 +204,11 @@ class ConsumerContractTest {
     @AllArgsConstructor
     static class CreateBookDto {
         private String title;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    static class IdCheckDto {
+        private UUID id;
     }
 }

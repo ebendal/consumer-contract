@@ -1,7 +1,7 @@
 version: '2'
 services:
   pact-broker:
-    image: pactfoundation/pact-broker
+    image: pactfoundation/pact-broker:2
     container_name: gatling-consumer-contract-pact-broker
     environment:
     - PACT_BROKER_DATABASE_ADAPTER=sqlite

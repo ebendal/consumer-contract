@@ -22,17 +22,20 @@ public class PactFramework implements ConsumerContractFramework {
 
     private Set<Interaction> map(Pact pact) {
         return pact.getInteractions().stream()
-            .map(interaction -> Interaction.builder()
-                .providerName(pact.getProvider().getName())
-                .consumerName(pact.getConsumer().getName())
-                .interactionName(interaction.getDescription())
-                .method(HttpMethod.valueOf(interaction.asSynchronousRequestResponse().getRequest().getMethod()))
-                .path(interaction.asSynchronousRequestResponse().getRequest().getPath())
-                .body(interaction.asSynchronousRequestResponse().getRequest().getPath())
-                .requestHeaders(interaction.asSynchronousRequestResponse().getRequest().getHeaders())
-                .queryParameters(interaction.asSynchronousRequestResponse().getRequest().getQuery())
-                .statusCode(interaction.asSynchronousRequestResponse().getResponse().getStatus())
-                .build())
+            .map(interaction -> {
+                var body = interaction.asSynchronousRequestResponse().getRequest().getBody().isMissing() ? null : interaction.asSynchronousRequestResponse().getRequest().getBody().valueAsString();
+                return Interaction.builder()
+                    .providerName(pact.getProvider().getName())
+                    .consumerName(pact.getConsumer().getName())
+                    .interactionName(interaction.getDescription())
+                    .method(HttpMethod.valueOf(interaction.asSynchronousRequestResponse().getRequest().getMethod()))
+                    .path(interaction.asSynchronousRequestResponse().getRequest().getPath())
+                    .body(body)
+                    .requestHeaders(interaction.asSynchronousRequestResponse().getRequest().getHeaders())
+                    .queryParameters(interaction.asSynchronousRequestResponse().getRequest().getQuery())
+                    .statusCode(interaction.asSynchronousRequestResponse().getResponse().getStatus())
+                    .build();
+            })
             .collect(Collectors.toSet());
     }
 }
