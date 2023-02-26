@@ -9,10 +9,15 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>consumer-contract-core</artifactId>
+    <artifactId>consumer-contract-gatling</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
+        <dependency>
+            <groupId>com.ebendal</groupId>
+            <artifactId>consumer-contract-core</artifactId>
+            <version>${revision}</version>
+        </dependency>
         <dependency>
             <groupId>io.gatling</groupId>
             <artifactId>gatling-core-java</artifactId>

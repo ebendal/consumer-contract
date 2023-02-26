@@ -31,8 +31,13 @@ class BookController {
 
     private final Map<UUID, Book> map = new ConcurrentHashMap<>();
 
+    private final AuthorClient authorClient;
+
     @PostMapping
     public ResponseEntity<Book> createBook(@RequestBody CreateBookDto createBookDto) {
+        if (!authorClient.exists(createBookDto.getAuthorID())) {
+            return ResponseEntity.badRequest().build();
+        }
         Book book = Book.from(createBookDto);
         map.put(book.getId(), book);
         return ResponseEntity.status(HttpStatus.CREATED).body(book);
@@ -65,6 +70,26 @@ class BookController {
     @NoArgsConstructor
     public static class CreateBookDto {
         private String title;
+        private UUID authorID;
+    }
+
+    @Getter
+    @Setter
+    @ToString
+    @NoArgsConstructor
+    public static class BookDto {
+        private UUID id;
+        private String title;
+        private AuthorDto author;
+    }
+
+    @Getter
+    @Setter
+    @ToString
+    @NoArgsConstructor
+    public static class AuthorDto {
+        private UUID id;
+        private String name;
     }
 
     @Getter

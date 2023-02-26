@@ -1,17 +1,17 @@
 package com.ebendal.example;
 
-import com.ebendal.gatling.consumer.contract.ConsumerContractStore;
-import com.ebendal.gatling.consumer.contract.PactFramework;
+import com.ebendal.consumer.contract.gatling.GatlingConsumerContractStore;
+import com.ebendal.consumer.contract.pact.PactFramework;
 import io.gatling.javaapi.core.Simulation;
 import io.gatling.javaapi.http.HttpProtocolBuilder;
 
 import java.time.Duration;
 
-import static com.ebendal.gatling.consumer.contract.dsl.DSL.bodyInject;
-import static com.ebendal.gatling.consumer.contract.dsl.DSL.checkAndSave;
-import static com.ebendal.gatling.consumer.contract.dsl.DSL.headerReplace;
-import static com.ebendal.gatling.consumer.contract.dsl.DSL.pathInject;
-import static com.ebendal.gatling.consumer.contract.dsl.DSL.queryParameterReplace;
+import static com.ebendal.consumer.contract.gatling.dsl.DSL.bodyInject;
+import static com.ebendal.consumer.contract.gatling.dsl.DSL.checkAndSave;
+import static com.ebendal.consumer.contract.gatling.dsl.DSL.headerReplace;
+import static com.ebendal.consumer.contract.gatling.dsl.DSL.pathInject;
+import static com.ebendal.consumer.contract.gatling.dsl.DSL.queryParameterReplace;
 import static io.gatling.javaapi.core.CoreDsl.constantUsersPerSec;
 import static io.gatling.javaapi.core.CoreDsl.global;
 import static io.gatling.javaapi.core.CoreDsl.jsonPath;
@@ -20,10 +20,10 @@ import static io.gatling.javaapi.http.HttpDsl.http;
 
 public class GatlingSimulation extends Simulation {
 
-    private final ConsumerContractStore contractStore = new ConsumerContractStore(new PactFramework());
+    private final GatlingConsumerContractStore contractStore = new GatlingConsumerContractStore(new PactFramework());
 
     public GatlingSimulation() {
-        contractStore.loadInteractions(Name.PROVIDER);
+        contractStore.loadInteractions(Name.BOOK_PROVIDER);
         HttpProtocolBuilder httpProtocol = http.baseUrl("http://localhost:8080");
         var statefulScenario = scenario("Stateful scenario")
             .exec(contractStore.interaction(Name.CONSUMER_ONE, Name.CREATE_BOOK_INTERACTION, checkAndSave(jsonPath("$.id"), "id")))

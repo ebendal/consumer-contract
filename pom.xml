@@ -4,14 +4,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.ebendal</groupId>
-    <artifactId>gatling-consumer-contract</artifactId>
+    <artifactId>consumer-contract</artifactId>
     <name>${project.groupId}:${project.artifactId}</name>
-    <description>Library for using consumer contracts as input for Gatling</description>
-    <url>https://github.com/ebendal/gatling-consumer-contract</url>
+    <description>Library for using consumer contracts</description>
+    <url>https://github.com/ebendal/consumer-contract</url>
     <version>${revision}</version>
     <modules>
         <module>core</module>
         <module>pact</module>
+        <module>gatling</module>
+        <module>wiremock</module>
         <module>example</module>
     </modules>
     <packaging>pom</packaging>
@@ -26,8 +28,22 @@
         <maven-gatling-plugin.version>4.1.5</maven-gatling-plugin.version>
         <pact.version>4.3.9</pact.version>
         <jsonpath.version>2.7.0</jsonpath.version>
+        <wiremock.version>2.27.2</wiremock.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <dependencyManagement>
         <dependencies>
@@ -52,22 +68,24 @@
                 <version>${jsonpath.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.github.tomakehurst</groupId>
+                <artifactId>wiremock</artifactId>
+                <version>${wiremock.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.assertj</groupId>
                 <artifactId>assertj-core</artifactId>
                 <version>${assertj.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter</artifactId>
                 <version>${junit.version}</version>
-                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -193,9 +211,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/ebendal/gatling-consumer-contract.git</connection>
-        <developerConnection>scm:git:ssh://github.com:ebendal/gatling-consumer-contract.git</developerConnection>
-        <url>https://github.com/ebendal/gatling-consumer-contract</url>
+        <connection>scm:git:git://github.com/ebendal/consumer-contract.git</connection>
+        <developerConnection>scm:git:ssh://github.com:ebendal/consumer-contract.git</developerConnection>
+        <url>https://github.com/ebendal/consumer-contract</url>
     </scm>
 
     <distributionManagement>

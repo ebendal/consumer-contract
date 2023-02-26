@@ -3,13 +3,13 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>gatling-consumer-contract</artifactId>
+        <artifactId>consumer-contract</artifactId>
         <groupId>com.ebendal</groupId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>gatling-consumer-contract-pact</artifactId>
+    <artifactId>consumer-contract-pact</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -19,13 +19,23 @@
         </dependency>
         <dependency>
             <groupId>com.ebendal</groupId>
-            <artifactId>gatling-consumer-contract-core</artifactId>
+            <artifactId>consumer-contract-core</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>

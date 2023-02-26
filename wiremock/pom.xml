@@ -9,17 +9,18 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>consumer-contract-core</artifactId>
+    <artifactId>consumer-contract-wiremock</artifactId>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>io.gatling</groupId>
-            <artifactId>gatling-core-java</artifactId>
+            <groupId>com.ebendal</groupId>
+            <artifactId>consumer-contract-core</artifactId>
+            <version>${revision}</version>
         </dependency>
         <dependency>
-            <groupId>io.gatling</groupId>
-            <artifactId>gatling-http-java</artifactId>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
