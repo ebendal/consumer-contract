@@ -21,7 +21,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.requestMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.request;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static java.util.stream.Collectors.toMap;
 
 @Slf4j
@@ -48,7 +49,8 @@ public class WireMockConsumerContractStore extends ConsumerContractStore {
         if (templatedValues.length > 0) {
             responseDefinitionBuilder = responseDefinitionBuilder.withTransformers("response-template");
         }
-        return requestMatching(new InteractionMatcher(interaction)).willReturn(responseDefinitionBuilder);
+        return request(interaction.getMethod().name(), urlPathMatching(interaction.getPath().getRegularExpression()))
+            .willReturn(responseDefinitionBuilder);
     }
 
     private Optional<String> extractBody(HttpInteraction interaction, Set<JsonBodyTemplatedValue> templatedValues) {
