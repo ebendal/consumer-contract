@@ -1,6 +1,9 @@
 package com.ebendal.consumer.contract.pact;
 
+import au.com.dius.pact.core.model.IRequest;
+import au.com.dius.pact.core.model.OptionalBody;
 import au.com.dius.pact.core.model.Pact;
+import au.com.dius.pact.core.model.SynchronousRequestResponse;
 import au.com.dius.pact.core.model.matchingrules.MatchingRuleGroup;
 import au.com.dius.pact.core.model.matchingrules.RegexMatcher;
 import com.ebendal.consumer.contract.core.ConsumerContractFramework;
@@ -8,13 +11,11 @@ import com.ebendal.consumer.contract.core.HttpInteraction;
 import com.ebendal.consumer.contract.core.HttpMethod;
 import com.ebendal.consumer.contract.core.Interaction;
 import com.ebendal.consumer.contract.core.Path;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Slf4j
 public class PactFramework implements ConsumerContractFramework {
     private final CustomPactBrokerLoader customPactBrokerLoader;
 
@@ -32,29 +33,38 @@ public class PactFramework implements ConsumerContractFramework {
 
     private Set<Interaction> map(Pact pact) {
         return pact.getInteractions().stream()
+            .filter(au.com.dius.pact.core.model.Interaction::isSynchronousRequestResponse)
             .map(interaction -> {
-                var body = interaction.asSynchronousRequestResponse().getRequest().getBody().isMissing() ? null : interaction.asSynchronousRequestResponse().getRequest().getBody().valueAsString();
+                var request = Optional.ofNullable(interaction.asSynchronousRequestResponse())
+                    .map(SynchronousRequestResponse::getRequest)
+                    .orElseThrow();
+                var response = Optional.ofNullable(interaction.asSynchronousRequestResponse())
+                    .map(SynchronousRequestResponse::getResponse)
+                    .orElseThrow();
+                var requestBody = Optional.of(request.getBody())
+                    .filter(OptionalBody::isPresent)
+                    .map(OptionalBody::valueAsString)
+                    .orElse(null);
                 return HttpInteraction.builder()
                     .providerName(pact.getProvider().getName())
                     .consumerName(pact.getConsumer().getName())
                     .interactionName(interaction.getDescription())
-                    .method(HttpMethod.valueOf(interaction.asSynchronousRequestResponse().getRequest().getMethod()))
-                    .path(getPath(interaction))
-                    .requestBody(body)
-                    .requestHeaders(interaction.asSynchronousRequestResponse().getRequest().getHeaders())
-                    .queryParameters(interaction.asSynchronousRequestResponse().getRequest().getQuery())
-                    .statusCode(interaction.asSynchronousRequestResponse().getResponse().getStatus())
-                    .responseHeaders(interaction.asSynchronousRequestResponse().getResponse().getHeaders())
-                    .responseBody(interaction.asSynchronousRequestResponse().getResponse().getBody().valueAsString())
+                    .method(HttpMethod.valueOf(request.getMethod()))
+                    .path(getPath(request))
+                    .requestBody(requestBody)
+                    .requestHeaders(request.getHeaders())
+                    .queryParameters(request.getQuery())
+                    .statusCode(response.getStatus())
+                    .responseHeaders(response.getHeaders())
+                    .responseBody(response.getBody().valueAsString())
                     .build();
             })
             .collect(Collectors.toSet());
     }
 
-    @NonNull
-    private static Path getPath(au.com.dius.pact.core.model.Interaction interaction) {
-        String path = interaction.asSynchronousRequestResponse().getRequest().getPath();
-        String regex = interaction.asSynchronousRequestResponse().getRequest().getMatchingRules().rulesForCategory("path").getMatchingRules().values().stream()
+    private static Path getPath(IRequest request) {
+        String path = request.getPath();
+        String regex = request.getMatchingRules().rulesForCategory("path").getMatchingRules().values().stream()
             .findFirst()
             .map(MatchingRuleGroup::getRules)
             .flatMap(rules -> rules.stream().findFirst())
@@ -62,7 +72,6 @@ public class PactFramework implements ConsumerContractFramework {
             .map(RegexMatcher.class::cast)
             .map(RegexMatcher::getRegex)
             .orElse(String.format("^%s$", path));
-        log.info("Regex: {}", regex);
         return Path.builder()
             .example(path)
             .regularExpression(regex)
